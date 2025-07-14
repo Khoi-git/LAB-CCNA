@@ -1,0 +1,18 @@
+B1: đặt tên access_list
+ip access-list extended ALLOW_TELNET_SSH_VLAN10
+B2: 
+ permit tcp 172.16.10.0 0.0.0.255 any eq 22    # Cho phép SSH từ VLAN10
+ permit tcp 172.16.10.0 0.0.0.255 any eq 23    # Cho phép Telnet từ VLAN10
+ permit icmp any any                           # Cho phép ping (ICMP) từ mọi VLAN
+ deny tcp any any eq 22                        # Chặn SSH từ tất cả các VLAN khác
+ deny tcp any any eq 23                        # Chặn Telnet từ tất cả các VLAN khác
+B3:
+interface Vlan10
+ ip access-group ALLOW_TELNET_SSH_VLAN10 in
+
+interface Vlan20
+ ip access-group ALLOW_TELNET_SSH_VLAN10 in
+
+interface Vlan30
+ ip access-group ALLOW_TELNET_SSH_VLAN10 in
+
