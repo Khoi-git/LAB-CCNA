@@ -1,0 +1,10 @@
+B1: ta thực hiện Nat trên route R9:
+tạo access-list :
+conf t
+access-list 1 permit any 
+ip nat inside source list 1 inter e0/2 overload
+ip nat inside source list 1 inter e0/3 overload
+int range e0/2-3
+ip nat outside
+int bvi1  
+ip nat inside

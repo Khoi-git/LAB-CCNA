@@ -1,0 +1,28 @@
+Để ping đc các pc trong mạng với nhau thì phải cấu hình bvi cho R9
+và cấu hình vlan trên các sw 
+B1: trên 2 sw L3 làm như sau:
+conf t
+int rang e0/0-1 
+sw trunk en do
+sw mod trunk
+int e0/2 
+sw mod acc
+sw acc vlan 10
+B2: Cấu hình vlan trên 2 sw L2
+int e0/2
+sw mod acc
+sw acc vlan 20
+B3: trên R9 cấu hình bvi và định tuyến đến mạng Vlan 20 để các pc
+có thể ping thông đc cho nhau
+ở mode enable
+bridge irb
+bridge 1 protocol ieee
+bridge 1 route ip 
+int ran e0/0-1
+no sh
+bridge-group 1
+ex
+bvi 1 
+ip add 10.1.1.4 255.255.255.248
+ex
+ip route 10.2.2.0 255.255.255.0 bvi1 

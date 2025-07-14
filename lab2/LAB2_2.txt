@@ -1,0 +1,45 @@
+Để cấu hình dự phòng HSRP (Hot Standby Router Protocol) giữa hai switch L3_SW29 và L3_SW30, bạn cần đảm bảo rằng:
+- L3_SW29 sẽ đóng vai trò active.
+- L3_SW30 sẽ đóng vai trò standby.
+- VIP (Virtual IP) cho VLAN 10 sẽ là 10.1.1.1.
+- VIP cho VLAN 20 sẽ là 10.2.2.1.
+- HSRP sẽ giúp tạo ra một địa chỉ IP ảo để các thiết bị đầu cuối (PC, máy chủ) trong VLAN có thể sử dụng nó làm cổng mặc định (default gateway). 
+Trong trường hợp L3_SW29 bị lỗi, L3_SW30 sẽ tự động trở thành active và đảm nhận vai trò của gateway.
+
+Trên L3_SW29 (Router 1, Active)
+conf t
+! Cấu hình HSRP cho VLAN 10
+interface vlan 10
+no sh
+  ip address 10.1.1.2 255.255.255.248  # Địa chỉ IP vật lý của L3_SW29 trên VLAN 10
+  standby 10 ip 10.1.1.1               # VIP (Virtual IP) là 10.1.1.1
+  standby 10 priority 110              # Ưu tiên cao hơn (110) để L3_SW29 là active
+  standby 10 preempt                   # Đảm bảo L3_SW29 luôn trở thành active nếu quay trở lại sau khi bị lỗi
+
+! Cấu hình HSRP cho VLAN 20
+interface vlan 20
+no sh
+  ip address 10.2.2.2 255.255.255.0    # Địa chỉ IP vật lý của L3_SW29 trên VLAN 20
+  standby 20 ip 10.2.2.1               # VIP (Virtual IP) là 10.2.2.1
+  standby 20 priority 110              # Ưu tiên cao hơn (110) để L3_SW29 là active
+  standby 20 preempt                   # Đảm bảo L3_SWs9 luôn trở thành active nếu quay trở lại sau khi bị lỗi
+exit
+
+Trên L3_SW30
+conf t
+! Cấu hình HSRP cho VLAN 10
+interface vlan 10
+no sh
+  ip address 10.1.1.3 255.255.255.248  # Địa chỉ IP vật lý của L3_SW30 trên VLAN 10
+  standby 10 ip 10.1.1.1               # VIP là 10.1.1.1
+  standby 10 priority 100              # Ưu tiên thấp hơn (100) để L3_SW30 là standby
+  standby 10 preempt                   # Cho phép L3_SW30 có thể giành quyền active nếu  L3_SW29 gặp sự cố
+! Cấu hình HSRP cho VLAN 20
+interface vlan 20
+no sh
+  ip address 10.2.2.3 255.255.255.0   # Địa chỉ IP vật lý của L3_SW30 trên VLAN 20
+  standby 20 ip 10.2.2.1              # VIP là 10.2.2.1
+  standby 20 priority 100             # Ưu tiên thấp hơn (100) để L3_SW30 là standby
+  standby 20 preempt                  # Cho phép L3_SW30 có thể giành quyền active nếu L3_SW29 gặp sự cố
+exit
+

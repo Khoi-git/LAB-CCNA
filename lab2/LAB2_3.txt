@@ -1,0 +1,47 @@
+1. Cấu hình Spanning-Tree Protocol (STP)
+	là một giao thức được sử dụng trong các mạng Ethernet để ngăn chặn hiện tượng lặp (loop) xảy
+	 ra khi có nhiều đường kết nối giữa các switch. STP đảm bảo rằng chỉ có một đường dẫn hoạt động giữa hai thiết bị
+	 trong một mạng Ethernet, nhờ đó loại bỏ hiện tượng lặp và đảm bảo mạng hoạt động ổn định.
+
+	PVST+ (Per VLAN Spanning Tree Plus): Mỗi VLAN có một phiên bản STP riêng biệt.
+RSTP (Rapid Spanning Tree Protocol): Phiên bản nhanh hơn của STP, thường được sử dụng hơn.
+MST (Multiple Spanning Tree): Cho phép nhóm nhiều VLAN vào cùng một instance STP để tối ưu hóa.
+	Ở đây, ta sẽ cấu hình RSTP (Rapid Spanning Tree Protocol).
+
+2. Cấu hình trên tất cả các switch (L3_SW29, L3_SW30, L2_SW24, L2_SW25, L2_SW26, L2_SW27)
+Bước 1: Cấu hình Spanning-Tree (RSTP)
+Trên tất cả các switch, thực hiện cấu hình sau:
+	conf t
+	spanning-tree mode rapid-pvst           # Cấu hình chế độ RSTP
+	spanning-tree vlan 10 root primary      # Đặt switch làm root cho VLAN 10 (chỉ trên 	switch ưu tiên)
+	spanning-tree vlan 20 root secondary    # Đặt switch làm root dự phòng cho VLAN 20 (chỉ trên switch ưu tiên)
+	spanning-tree vlan 10,20 priority 24576 # Đặt độ ưu tiên cho switch nếu cần làm root hoặc dự phòng
+	spanning-tree portfast default          # Kích hoạt PortFast cho các cổng không kết nối với switch khác (các cổng người dùng)
+	exit
+Bước 2: Cấu hình VTP Mode Transparent # để đồng bộ vlan trên tất các các sw
+Trên tất cả các switch, thực hiện cấu hình sau:
+	conf t
+	vtp mode transparent     # Đặt chế độ VTP thành Transparent
+	vtp domain example.com   # (Tùy chọn) Đặt domain VTP nếu cần
+	exit
+3. Cấu hình chi tiết cho từng switch
+	Switch L3_SW29 (switch core, root cho VLAN 10):
+	conf t
+	spanning-tree mode rapid-pvst
+	spanning-tree vlan 10 root primary    # L3_SW29 là root cho VLAN 10
+	spanning-tree vlan 20 root secondary  # L3_SW29 là root dự phòng cho VLAN 20
+	vtp mode transparent
+	exit
+	Switch L3_SW30 (switch core, root cho VLAN 20):
+	conf t
+	spanning-tree mode rapid-pvst
+	spanning-tree vlan 20 root primary    # L3_SW30 là root cho VLAN 20
+	spanning-tree vlan 10 root secondary  # L3_SW30 là root dự phòng cho VLAN 10
+	vtp mode transparent
+	exit
+
+4. Kiểm tra cấu hình
+	Kiểm tra trạng thái Spanning-tree
+	show spanning-tree
+	Kiểm tra VTP mode
+	show vtp status

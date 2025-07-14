@@ -1,0 +1,47 @@
+I. Tổng quan cấu hình Port-Channel
+	Port-Channel giúp bạn nhóm nhiều đường truyền vật lý lại thành một đường logic, tăng băng thông và cung cấp tính dự phòng.
+	Chúng ta sẽ cấu hình port-channel trên hai cổng vật lý giữa L3_SW29 và L3_SW30, giả sử là cổng e1/0 và e1/1.
+
+II. Cấu hình Port-Channel trên L3_SW29
+    Bước 1: Tạo Port-Channel và thêm các interface vào nhóm
+    	conf t
+	interface range e1/2 - 3           # Chọn các cổng vật lý để nhóm vào port-channel
+  	channel-group 1 mode active        # Kích hoạt LACP với mode "active"
+  	no shutdown
+	exit
+    Bước 2: Cấu hình Port-Channel
+	interface port-channel 1
+	sw trunk encap do
+  	switchport mode trunk       # Đặt port-channel ở chế độ trunk để truyền nhiều VLAN
+  	switchport trunk allowed vlan 10,20     # Chỉ cho phép VLAN 10 và 20 qua trunk
+  	no shutdown
+	exit
+
+III. Cấu hình Port-Channel trên L3_SW30
+	Tương tự, cấu hình trên L3_SW30 cũng sẽ giống với L3_SW29.
+    Bước 1: Tạo Port-Channel và thêm các interface vào nhóm
+	conf t
+	interface range e1/1 - 2     # Chọn các cổng vật lý để nhóm vào port-channel
+  	channel-group 1 mode active  # Kích hoạt LACP với mode "active"
+  	no shutdown
+	exit
+    Bước 2: Cấu hình Port-Channel
+	interface port-channel 1
+	sw trunk encap do
+  	switchport mode trunk    # Đặt port-channel ở chế độ trunk để truyền nhiều VLAN
+  	switchport trunk allowed vlan 10,20  # Chỉ cho phép VLAN 10 và 20 qua trunk
+  	no shutdown
+	exit
+
+IV. Kiểm tra cấu hình
+	show etherchannel summary
+	# Nếu cổng hiển thị trạng thái "P" (in port-channel), điều đó có nghĩa là port-channel đã hoạt động thành công.
+
+V. Kiểm tra chi tiết port-channel
+	show etherchannel 1 detail
+	#Lệnh này cung cấp thông tin chi tiết về port-channel 1, bao gồm các giao thức, trạng thái LACP, và các thông số khác.
+
+VI. Kiểm tra trạng thái LACP:
+	show lacp neighbor
+
+
